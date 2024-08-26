@@ -7,6 +7,7 @@ environment:
   sdk: '>=3.3.4 <4.0.0'
 dependencies:
   mime: ^1.0.5
+  image_gallery_saver:
   adaptive_theme: 3.6.0
   app_to_foreground: ^0.0.3
   args: ^2.5.0
