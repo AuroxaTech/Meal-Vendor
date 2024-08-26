@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:vendor/views/pages/vendor_chat_support/vendor_chat_support.dart';
-
 import '../../../constants/app_colors.dart';
-import '../../../constants/app_strings.dart';
 import '../../../constants/app_text_styles.dart';
 import '../../../models/ticket_list_model.dart';
 import '../../../requests/order.request.dart';
 import '../../../utils/ui_spacer.dart';
-import '../../../utils/utils.dart';
 
 class MessagesPage extends StatefulWidget {
   const MessagesPage({super.key});

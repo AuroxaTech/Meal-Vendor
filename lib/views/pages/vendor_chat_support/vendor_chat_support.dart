@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vendor/widgets/states/loading.shimmer.dart';
 import '../../../constants/app_colors.dart';
 import '../../../models/ticket_list_model.dart';
 import '../../../requests/order.request.dart';
@@ -161,7 +162,7 @@ class _VendorChatSupportState extends State<VendorChatSupport> {
         children: [
           Expanded(
             child: _isLoadingMessages
-                ? const Center(child: CircularProgressIndicator())
+                ? const LoadingShimmer()
                 : ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
