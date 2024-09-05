@@ -147,6 +147,23 @@ class OrdersViewModel extends MyBaseViewModel {
     }
     setBusy(false);
   }
+  Future<void> updatePreparationTime(String status) async {
+    setBusy(true);
+    try {
+      await orderRequest.updatePreparationTime(status); // Call the method from OrderRequest
+      viewContext.showToast(
+        msg: "Vendor preparation time updated successfully",
+        bgColor: Colors.green,
+      );
+    } catch (error) {
+      viewContext.showToast(
+        msg: "Failed to update preparation time: $error",
+        bgColor: Colors.red,
+      );
+    }
+    setBusy(false);
+  }
+
 
   Future<void> fetchReadyOrders({bool initialLoading = true}) async {
     if (initialLoading) {

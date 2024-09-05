@@ -3,6 +3,7 @@ import 'coordinates.dart';
 class Address {
   /// The geographic coordinates.
   final Coordinates? coordinates;
+  final String? placeId;
 
   /// The formatted address with all lines.
   final String? addressLine;
@@ -44,6 +45,7 @@ class Address {
     this.subAdminArea,
     this.locality,
     this.subLocality,
+    this.placeId
   });
 
 /*
@@ -62,8 +64,10 @@ class Address {
   ]
   */
 
+
   /// Creates an address from a map containing its properties.
   Address fromMap(Map map) {
+    print("Address Response: $map");
     String featureName;
     try {
       featureName = map['formatted_address'];
@@ -77,7 +81,7 @@ class Address {
         featureName = structuredFormatting["main_text"];
       }
     }
-
+    print("Place ID in fromMap: ${map['place_id']}");
     return Address(
       coordinates: map["geometry"] != null
           ? Coordinates.fromMap(map["geometry"]["location"])
@@ -90,6 +94,7 @@ class Address {
         map,
         nameTye: "short_name",
       ),
+      placeId: map['place_id'],
       featureName: featureName,
       postalCode: getTypeFromAddressComponents("postal_code", map),
       locality: getTypeFromAddressComponents("locality", map),
@@ -123,6 +128,7 @@ class Address {
           ? Coordinates.fromMap(map["geometry"]["location"])
           : null,
       addressLine: map['formatted_address'],
+      placeId: map['place_id'],
       countryName: getTypeFromAddressComponents("country", map),
       countryCode: getTypeFromAddressComponents(
         "country",

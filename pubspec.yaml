@@ -88,6 +88,7 @@ dependencies:
   url_launcher: ^6.3.0
   velocity_x: 4.2.1
   auto_size_text: ^3.0.0
+  geocoding: 
 
 dependency_overrides:
   intl: ^0.18.1
@@ -109,7 +110,7 @@ flutter_icons:
   remove_alpha_ios: true
   image_path: "assets/images/mealknight.jpg"
   adaptive_icon_foreground: "assets/images/mealknight.jpg"
-  adaptive_icon_background: "#5e17eb"
+  adaptive_icon_background: "#ffffff"
 
 flutter:
   uses-material-design: true

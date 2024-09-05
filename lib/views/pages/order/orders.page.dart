@@ -72,7 +72,7 @@ class _OrdersPageState extends State<OrdersPage>
                     ),
                     InkWell(
                       onTap: () {
-                        openDialog();
+                        openDialog(vm);
                       },
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(15, 2, 15, 2),
@@ -300,7 +300,7 @@ class _OrdersPageState extends State<OrdersPage>
   @override
   bool get wantKeepAlive => true;
 
-  void openDialog() {
+  void openDialog(OrdersViewModel vm) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -324,23 +324,33 @@ class _OrdersPageState extends State<OrdersPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text('Status:',
-                        style: AppTextStyle.comicNeue40BoldTextStyle(
-                            color: AppColor.appMainColor))
+                    style: AppTextStyle.comicNeue40BoldTextStyle(
+                        color: AppColor.appMainColor))
                     .p8(),
                 UiSpacer.verticalSpace(space: 5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    // "On Time" will trigger the "on-time" API request
                     statusWidget("On\nTime",
                         color: AppColor.appMainColor,
-                        onTap: () => Navigator.pop(context)),
+                        onTap: () {
+                          Navigator.pop(context);  // Close dialog
+                          vm.updatePreparationTime("on-time");
+                        }),
                     statusWidget("Busy\n+10 min",
                         color: AppColor.appMainColor,
-                        onTap: () => Navigator.pop(context)),
+                        onTap: () {
+                          Navigator.pop(context);  // Close dialog
+                          vm.updatePreparationTime("busy");
+                        }),
                     statusWidget("Super busy\n+15 min",
                         color: AppColor.appMainColor,
-                        onTap: () => Navigator.pop(context)),
+                        onTap: () {
+                          Navigator.pop(context);  // Close dialog
+                          vm.updatePreparationTime("super-busy");
+                        }),
                   ],
                 ),
                 const Spacer(),

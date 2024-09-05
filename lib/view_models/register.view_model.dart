@@ -11,6 +11,7 @@ import 'package:vendor/services/geocoder.service.dart';
 import 'package:vendor/traits/qrcode_scanner.trait.dart';
 import 'package:vendor/utils/utils.dart';
 import 'package:localize_and_translate/localize_and_translate.dart';
+import '../services/geocoder_service.dart';
 import 'base.view_model.dart';
 
 class RegisterViewModel extends MyBaseViewModel with QrcodeScannerTrait {
@@ -51,26 +52,46 @@ class RegisterViewModel extends MyBaseViewModel with QrcodeScannerTrait {
   }
 
   Future<List<Address>> searchAddress(String keyword) async {
-    if(keyword.length < 4){
+    if (keyword.length < 4) {
       return [];
     }
+
     List<Address> addresses = [];
     try {
+      // Since findAddressesFromQuery returns a List<Address>, just assign it directly
       addresses = await GeocoderService().findAddressesFromQuery(keyword);
     } catch (error) {
       toastError("$error");
     }
 
-    //
     return addresses;
   }
 
-  onAddressSelected(Address address) {
-    this.address = address.addressLine;
-    latitude = address.coordinates?.latitude.toString();
-    longitude = address.coordinates?.longitude.toString();
-    addressTEC.text = "${address.addressLine}";
-    notifyListeners();
+  onAddressSelected(Address address) async {
+    print("Place Id ===> ${address.placeId}");
+
+    // Check if the address has a place_id
+    if (address.placeId != null) {
+      try {
+        // Fetch full address details from the place_id
+        Address fullAddress = await GeocoderService().getAddressDetails(address.placeId!);
+
+        // Set the full address details including latitude and longitude
+        this.address = fullAddress.addressLine;
+        latitude = fullAddress.coordinates?.latitude.toString();
+        longitude = fullAddress.coordinates?.longitude.toString();
+        addressTEC.text = fullAddress.addressLine ?? "";
+
+        print("Lat Lng ===> $latitude, $longitude");
+
+        notifyListeners();
+      } catch (error) {
+        toastError("Failed to fetch address details: $error");
+        print("Adress Details Error ====> Failed to fetch address details: $error");
+      }
+    } else {
+      toastError("Selected address does not have a place ID");
+    }
   }
 
   fetchVendorTypes() async {
@@ -131,6 +152,7 @@ class RegisterViewModel extends MyBaseViewModel with QrcodeScannerTrait {
       params["latitude"] = latitude;
       params["longitude"] = longitude;
       setBusy(true);
+      print("Signup Params ====> ${params}");
       try {
         final apiResponse = await _authRequest.registerRequest(
           vals: params,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:vendor/constants/api.dart';
 import 'package:vendor/constants/app_map_settings.dart';
 import 'package:vendor/constants/app_strings.dart';
@@ -8,7 +10,7 @@ import 'package:vendor/services/http.service.dart';
 import 'package:vendor/utils/utils.dart';
 import 'package:localize_and_translate/localize_and_translate.dart';
 import 'package:singleton/singleton.dart';
-
+import 'package:http/http.dart' as http;
 export 'package:vendor/models/address.dart';
 export 'package:vendor/models/coordinates.dart';
 
@@ -145,6 +147,32 @@ class GeocoderService extends HttpService {
       }).toList();
     }
     return [];
+  }
+
+  final String apiKey = "AIzaSyCqfaE_jRJULSWkLB5X1i9wRQyVnQ4huHA";  // Your Google API key
+
+  Future<Address> getAddressDetails(String placeId) async {
+    final url = Uri.parse(
+      "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=${AppStrings.googleMapApiKey}",
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data['status'] == 'OK') {
+        final result = data['result'];
+
+        // Create an instance of Address and call fromPlaceDetailsMap
+        Address address = Address();
+        return address.fromPlaceDetailsMap(result);
+      } else {
+        throw Exception("Failed to fetch place details: ${data['status']}");
+      }
+    } else {
+      throw Exception("Failed to load place details");
+    }
   }
 
   Future<Address> fecthPlaceDetails(Address address) async {

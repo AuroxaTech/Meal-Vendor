@@ -32,7 +32,7 @@ class _ProductsPageState extends State<ProductsPage>
     return SafeArea(
       child: ViewModelBuilder<ProductViewModel>.reactive(
         viewModelBuilder: () => ProductViewModel(context),
-        onViewModelReady: (vm) => vm.initialise(),
+        onViewModelReady: (vm) => vm.initialise(), // Initialise the view model
         builder: (context, vm, child) {
           return BasePage(
             body: Container(
@@ -77,9 +77,7 @@ class _ProductsPageState extends State<ProductsPage>
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(18),
                                     border: Border.all(
-                                        width: status.id == vm.menuId
-                                            ? 4
-                                            : 2,
+                                        width: status.id == vm.menuId ? 4 : 2,
                                         color: status.id == vm.menuId
                                             ? AppColor.appMainColor
                                             : Colors.transparent)),
@@ -103,27 +101,27 @@ class _ProductsPageState extends State<ProductsPage>
                   vm.isBusy
                       ? const LoadingShimmer()
                       : GridView.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            mainAxisExtent: getWidth(100),
-                            mainAxisSpacing: 0.0,
-                            crossAxisSpacing: 0.0,
-                            crossAxisCount: SizeConfigs.isTablet ? 2 : 1,
-                          ),
-                          itemCount: vm.products.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final product = vm.products[index];
-                            return ManageProductListItem(
-                              product,
-                              isLoading: vm.busy(product.id),
-                              onPressed: vm.openProductDetails,
-                              onEditPressed: vm.editProduct,
-                              onToggleStatusPressed: vm.changeProductStatus,
-                              onDeletePressed: vm.deleteProduct,
-                              onUpdateProductAvailability:
-                                  vm.onUpdateProductAvailability,
-                            );
-                          }).p4().expand(),
+                      gridDelegate:
+                      SliverGridDelegateWithFixedCrossAxisCount(
+                        mainAxisExtent: getWidth(100),
+                        mainAxisSpacing: 0.0,
+                        crossAxisSpacing: 0.0,
+                        crossAxisCount: SizeConfigs.isTablet ? 2 : 1,
+                      ),
+                      itemCount: vm.products.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final product = vm.products[index];
+                        return ManageProductListItem(
+                          product,
+                          isLoading: vm.busy(product.id),
+                          onPressed: vm.openProductDetails,
+                          onEditPressed: vm.editProduct,
+                          onToggleStatusPressed: vm.changeProductStatus,
+                          onDeletePressed: vm.deleteProduct,
+                          onUpdateProductAvailability:
+                          vm.onUpdateProductAvailability,
+                        );
+                      }).p4().expand(),
                 ],
               ),
             ),

@@ -57,7 +57,14 @@ class ProductViewModel extends MyBaseViewModel {
             "type": "small",
           },
         );
+
+        // Automatically select the first menu if none is selected
+        if (vendor != null && vendor!.menus.isNotEmpty && menuId == -1) {
+          menuId = vendor!.menus.first.id; // Select the first menu by default
+        }
+
         notifyListeners();
+        fetchMyProducts(); // Fetch products for the selected menu
         clearErrors();
       } catch (error) {
         setError(error);
@@ -67,6 +74,7 @@ class ProductViewModel extends MyBaseViewModel {
       }
     }
   }
+
 
   fetchMyProducts({bool initialLoading = true}) async {
     if (initialLoading) {
@@ -80,7 +88,7 @@ class ProductViewModel extends MyBaseViewModel {
       final mProducts = await productRequest.getProducts(
           page: queryPage,
           keyword: keyword == "All Product" ? "" : keyword.toLowerCase(),
-          categoriesId: menuId < 0 ? '' : '?menu_id=$menuId');
+          menuId: menuId);
       if (!initialLoading) {
         products.addAll(mProducts);
       } else {

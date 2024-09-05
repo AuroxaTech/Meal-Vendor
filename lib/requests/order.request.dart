@@ -125,11 +125,11 @@ class OrderRequest extends HttpService {
   }) async {
     try {
       final apiResult = await post(
-        "${Api.itemRemoved}/$orderId/$itemId",
-        json.encode({
-            "order_Id":orderId,
-            "itemId":itemId
-        })
+          "${Api.itemRemoved}/$orderId/$itemId",
+          json.encode({
+            "order_Id": orderId,
+            "itemId": itemId
+          })
       );
 
 
@@ -190,7 +190,9 @@ class OrderRequest extends HttpService {
         if (photo != null)
           'photo': await MultipartFile.fromFile(
             photo.path,
-            filename: photo.path.split('/').last,
+            filename: photo.path
+                .split('/')
+                .last,
           ),
       });
 
@@ -233,7 +235,8 @@ class OrderRequest extends HttpService {
 
     try {
       // Constructing the API URL
-      final url = "https://mealknight.ca/api/ticket/list?vendor_id=${id.vendorId}";
+      final url = "https://mealknight.ca/api/ticket/list?vendor_id=${id
+          .vendorId}";
 
       // Making the GET request
       final response = await http.get(
@@ -263,5 +266,39 @@ class OrderRequest extends HttpService {
     }
   }
 
+  Future<void> updatePreparationTime(String status) async {
+    // URL for the API request
+    final url = Uri.parse(
+        "https://mealknight.ca/api/increase-preparation/$status");
+    final userToken = await AuthServices.getAuthBearerToken();
+    try {
+      // Define headers, including authorization if needed
+      final headers = {
+        'Authorization': 'Bearer $userToken', // Add your API token here
+        'Content-Type': 'application/json',
+      };
 
+      // Make the GET request with headers
+      final response = await http.get(url, headers: headers);
+
+      // Check the status code
+      if (response.statusCode == 200) {
+        print("Raw Response Body===> ${response.body}");
+
+        if (response.headers['content-type']?.contains('application/json') ==
+            true) {
+          final responseBody = jsonDecode(response.body);
+          final message = responseBody["message"];
+          print("Success Message===> $message");
+        } else {
+          print("Unexpected non-JSON response===> ${response.body}");
+        }
+      } else {
+        print("Error: Received status code ${response.statusCode}");
+        print("Error Body: ${response.body}");
+      }
+    } catch (error) {
+      print("Error Message===> $error");
+    }
+  }
 }

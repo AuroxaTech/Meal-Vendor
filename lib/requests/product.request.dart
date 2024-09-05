@@ -15,13 +15,13 @@ class ProductRequest extends HttpService {
   Future<List<Product>> getProducts({
     String? keyword,
     int page = 1,
-    String? categoriesId,
+    int? menuId, // added parameter for menu_id
   }) async {
     final apiResult = await get(
-      "${Api.products}$categoriesId",
+      Api.products, // The base API URL
       queryParameters: {
         "keyword": keyword,
-        "type": "vendor",
+        "menu_id": menuId, // sending menu_id as a query param
         "page": page,
       },
     );
@@ -41,7 +41,6 @@ class ProductRequest extends HttpService {
         }
       }
       return products;
-
     } else {
       throw apiResponse.message;
     }
