@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:vendor/views/pages/vendor_chat_support/vendor_chat_support.dart';
+import 'package:vendor/widgets/states/loading.shimmer.dart';
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_text_styles.dart';
 import '../../../models/ticket_list_model.dart';
@@ -63,7 +64,7 @@ class _MessagesPageState extends State<MessagesPage> {
           future: _ticketsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const LoadingShimmer();
             } else if (snapshot.hasError) {
               final errorMessage = snapshot.error.toString().contains('Null')
                   ? 'Received unexpected null value'

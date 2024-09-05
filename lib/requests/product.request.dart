@@ -27,17 +27,21 @@ class ProductRequest extends HttpService {
     );
     //
     final apiResponse = ApiResponse.fromResponse(apiResult);
+    print("Api Response ====> ${apiResponse.data}");
     if (apiResponse.allGood) {
       List<Product> products = [];
       for (var jsonObject in apiResponse.data) {
         try {
           final mProduct = Product.fromJson(jsonObject);
           products.add(mProduct);
+          print("Product Api Response ====> ${mProduct.toJson()}");
+
         } catch (error) {
           print("Error ==> $error");
         }
       }
       return products;
+
     } else {
       throw apiResponse.message;
     }
@@ -135,7 +139,7 @@ class ProductRequest extends HttpService {
     }
     print(postBody);
     final apiResult = await post("${Api.products}/${product.id}", postBody);
-    print(apiResult.data);
+    print("Post Api ====> ${apiResult.data}");
     return ApiResponse.fromResponse(apiResult);
   }
 

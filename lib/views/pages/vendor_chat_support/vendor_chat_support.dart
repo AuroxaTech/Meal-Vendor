@@ -158,16 +158,16 @@ class _VendorChatSupportState extends State<VendorChatSupport> {
         ),
         centerTitle: true,
       ),
-      body: Column(
+      body:          _isLoadingMessages
+          ? const LoadingShimmer()
+          :  Column(
         children: [
           Expanded(
-            child: _isLoadingMessages
-                ? const LoadingShimmer()
-                : ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
-              itemCount: messages.length + (isChatClosed ? 1 : 0),
-              itemBuilder: (context, index) {
+                child: ListView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                            itemCount: messages.length + (isChatClosed ? 1 : 0),
+                            itemBuilder: (context, index) {
                 final reversedMessages = messages.reversed.toList();
 
                 if (index == reversedMessages.length && isChatClosed) {
@@ -277,9 +277,9 @@ class _VendorChatSupportState extends State<VendorChatSupport> {
                     ),
                   ],
                 );
-              },
-            ),
-          ),
+                            },
+                          ),
+              ),
           if (!isChatClosed)
             Padding(
               padding: const EdgeInsets.all(15.0),

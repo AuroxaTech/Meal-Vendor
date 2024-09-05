@@ -12,15 +12,15 @@ import '../busy_indicator.dart';
 
 class ManageProductListItem extends StatelessWidget {
   const ManageProductListItem(
-    this.product, {
-    this.isLoading = false,
-    required this.onPressed,
-    required this.onEditPressed,
-    required this.onToggleStatusPressed,
-    required this.onDeletePressed,
-    required this.onUpdateProductAvailability,
-    super.key,
-  });
+      this.product, {
+        this.isLoading = false,
+        required this.onPressed,
+        required this.onEditPressed,
+        required this.onToggleStatusPressed,
+        required this.onDeletePressed,
+        required this.onUpdateProductAvailability,
+        super.key,
+      });
 
   final Product product;
   final bool isLoading;
@@ -64,38 +64,46 @@ class ManageProductListItem extends StatelessWidget {
               ),
               Expanded(
                   child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(product.name,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(product.name,
                           textAlign: TextAlign.end,
                           style: AppTextStyle.comicNeue20BoldTextStyle(
                               color: AppColor.appMainColor))
-                      .pOnly(bottom: getWidth(5), right: getWidth(10)),
-                  Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                    InkWell(
+                          .pOnly(bottom: getWidth(5), right: getWidth(10)),
+                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        InkWell(
                             onTap: () {
                               openDialog(context, onUpdateProductAvailability);
                             },
                             child: Container(
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                        width: 1,
-                                        color: AppColor.appMainColor)),
-                                child: Text('Available',
-                                        textAlign: TextAlign.center,
-                                        style: AppTextStyle
-                                            .comicNeue20BoldTextStyle(
-                                                color: AppColor.appMainColor))
-                                    .px20()
-                                    .py4()))
-                        .pOnly(bottom: getWidth(5), right: getWidth(5)),
-                  ]),
-                ],
-              ).pOnly(right: 8)),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    width: 1,
+                                    color: product.isActive == 1
+                                        ? AppColor.appMainColor
+                                        : Colors.red, // Red border for out of stock
+                                  ),
+                                ),
+                                child: Text(
+                                  product.isActive == 1
+                                      ? 'Available'
+                                      : 'Out of Stock', // Change text based on status
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyle.comicNeue20BoldTextStyle(
+                                    color: product.isActive == 1
+                                        ? AppColor.appMainColor
+                                        : Colors.red, // Red text for out of stock
+                                  ),
+                                ).px20().py4()))
+                            .pOnly(bottom: getWidth(5), right: getWidth(5)),
+                      ]),
+                    ],
+                  ).pOnly(right: 8)),
             ],
           ).expand(),
           const Divider(thickness: 2).py1(),
@@ -106,11 +114,12 @@ class ManageProductListItem extends StatelessWidget {
 
   void openDialog(
       BuildContext context,
-      Function(
-              {required Product product,
-              required bool isAvailable,
-              int? minutes})
-          onUpdateProductAvailability) {
+      Function({
+      required Product product,
+      required bool isAvailable,
+      int? minutes,
+      }) onUpdateProductAvailability,
+      ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -120,36 +129,39 @@ class ManageProductListItem extends StatelessWidget {
           content: Container(
             padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(width: 4, color: AppColor.appMainColor)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(width: 4, color: AppColor.appMainColor),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
                   decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      border:
-                          Border.all(width: 3, color: AppColor.appGreenColor)),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(width: 3, color: AppColor.appGreenColor),
+                  ),
                   child: Text('Available',
-                          style: AppTextStyle.comicNeue27BoldTextStyle(
-                              color: AppColor.appGreenColor))
+                      style: AppTextStyle.comicNeue27BoldTextStyle(
+                          color: AppColor.appGreenColor))
                       .p4(),
                 ).pOnly(right: 15).onInkTap(() {
                   Navigator.pop(context);
                   onUpdateProductAvailability.call(
                       product: product, isAvailable: true);
+                  // Now instead of navigating, call the method to refresh the list
                 }),
                 const Spacer(),
                 Container(
                   decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(width: 3, color: Colors.red)),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(width: 3, color: Colors.red),
+                  ),
                   child: Text('Out of Stock',
-                          style: AppTextStyle.comicNeue27BoldTextStyle(
-                              color: Colors.red))
+                      style: AppTextStyle.comicNeue27BoldTextStyle(
+                          color: Colors.red))
                       .p4(),
                 ).onInkTap(() {
                   Navigator.pop(context);
@@ -164,14 +176,15 @@ class ManageProductListItem extends StatelessWidget {
     );
   }
 
+
   void openOutOfStockDialog(
       BuildContext context,
       Product product,
       Function(
-              {required Product product,
-              required bool isAvailable,
-              int? minutes})
-          onUpdateProductAvailability) {
+          {required Product product,
+          required bool isAvailable,
+          int? minutes})
+      onUpdateProductAvailability) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -198,8 +211,8 @@ class ManageProductListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text('How long is it out of stock for?',
-                        style: AppTextStyle.comicNeue27BoldTextStyle(
-                            color: AppColor.appMainColor))
+                    style: AppTextStyle.comicNeue27BoldTextStyle(
+                        color: AppColor.appMainColor))
                     .px(8.0),
                 UiSpacer.verticalSpace(space: 10),
                 Row(
@@ -293,9 +306,9 @@ class ManageProductListItem extends StatelessWidget {
 
   Widget _outOfStockWidget(
       {required BuildContext context,
-      required String title,
-      required int minutes,
-      required VoidCallback onTap}) {
+        required String title,
+        required int minutes,
+        required VoidCallback onTap}) {
     return Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
@@ -303,8 +316,8 @@ class ManageProductListItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           border: Border.all(width: 3, color: AppColor.appMainColor)),
       child: Text(title,
-              style: AppTextStyle.comicNeue27BoldTextStyle(
-                  color: AppColor.appMainColor))
+          style: AppTextStyle.comicNeue27BoldTextStyle(
+              color: AppColor.appMainColor))
           .p4()
           .px8(),
     ).onTap(() {

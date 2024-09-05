@@ -23,7 +23,6 @@ class ProductViewModel extends MyBaseViewModel {
   ProductRequest productRequest = ProductRequest();
   List<Product> products = [];
 
-  //List<ProductCategory> allCategories = [];
   int queryPage = 1;
   String keyword = "";
   int menuId = -1;
@@ -87,16 +86,6 @@ class ProductViewModel extends MyBaseViewModel {
       } else {
         products = mProducts;
       }
-      /*
-      allCategories.clear();
-      for (var element in products) {
-        for (var categoriesElement in element.categories) {
-          if (!allCategories.contains(categoriesElement)) {
-            allCategories.add(categoriesElement);
-          }
-        }
-      }
-       */
       clearErrors();
     } catch (error) {
       print("Product Error ==> $error");
@@ -148,7 +137,7 @@ class ProductViewModel extends MyBaseViewModel {
       type: CoolAlertType.confirm,
       title: "Status Update".tr(),
       text:
-          "${"Are you sure you want to".tr()} ${(product.isActive != 1 ? "Activate" : "Deactivate").tr()} ${product.name}?",
+      "${"Are you sure you want to".tr()} ${(product.isActive != 1 ? "Activate" : "Deactivate").tr()} ${product.name}?",
       onConfirmBtnTap: () {
         //
         Navigator.pop(viewContext);
@@ -202,8 +191,8 @@ class ProductViewModel extends MyBaseViewModel {
 
   onUpdateProductAvailability(
       {required Product product,
-      required bool isAvailable,
-      int? minutes}) async {
+        required bool isAvailable,
+        int? minutes}) async {
     setBusyForObject(product.id, true);
     try {
       final apiResponse = await productRequest.updateProductAvailability(
@@ -211,7 +200,8 @@ class ProductViewModel extends MyBaseViewModel {
           isAvailable: isAvailable,
           availableInMinutes: minutes);
       if (apiResponse.allGood) {
-        //update UI
+        // Refresh product list after updating availability
+        fetchMyProducts(); // This refreshes the product list
       }
       clearErrors();
     } catch (error) {
