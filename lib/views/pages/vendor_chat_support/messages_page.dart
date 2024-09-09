@@ -309,8 +309,8 @@ class _MessagesPageState extends State<MessagesPage> {
                             border: Border.all(
                                 width: 3, color: AppColor.appMainColor)),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 12.0),
-                        child: Text('Chat',
+                            horizontal: 12.0, vertical: 0),
+                        child: Text('Support\nTickets',
                             style: AppTextStyle.comicNeue25BoldTextStyle(
                                 color: AppColor.appMainColor))
                             .p4(),

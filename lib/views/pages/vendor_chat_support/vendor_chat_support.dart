@@ -280,41 +280,41 @@ class _VendorChatSupportState extends State<VendorChatSupport> {
                             },
                           ),
               ),
-          if (!isChatClosed)
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: "Write a message...",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  _isSendingMessage ? const CircularProgressIndicator() : Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: _sendMessage,
-                      ),
-                      // IconButton(
-                      //   icon: const Icon(Icons.image),
-                      //   onPressed: _selectImage,
-                      // ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          // if (!isChatClosed)
+          //   Padding(
+          //     padding: const EdgeInsets.all(15.0),
+          //     child: Row(
+          //       crossAxisAlignment: CrossAxisAlignment.center,
+          //       children: [
+          //         Expanded(
+          //           child: TextField(
+          //             controller: _controller,
+          //             decoration: InputDecoration(
+          //               hintText: "Write a message...",
+          //               border: OutlineInputBorder(
+          //                 borderRadius: BorderRadius.circular(30),
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //         const SizedBox(
+          //           width: 10,
+          //         ),
+          //         _isSendingMessage ? const CircularProgressIndicator() : Row(
+          //           children: [
+          //             IconButton(
+          //               icon: const Icon(Icons.send),
+          //               onPressed: _sendMessage,
+          //             ),
+          //             // IconButton(
+          //             //   icon: const Icon(Icons.image),
+          //             //   onPressed: _selectImage,
+          //             // ),
+          //           ],
+          //         ),
+          //       ],
+          //     ),
+          //   ),
 
         ],
       ),
