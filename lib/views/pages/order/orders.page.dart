@@ -77,16 +77,20 @@ class _OrdersPageState extends State<OrdersPage>
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(15, 2, 15, 2),
                         decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                                width: 3, color: AppColor.appMainColor)),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(width: 3, color: AppColor.appMainColor),
+                        ),
                         child: Text(
-                            vm.currentUser?.isOnline ?? false
-                                ? 'Open-Online'
-                                : 'Open-Normal',
-                            style: AppTextStyle.comicNeue25BoldTextStyle(
-                                color: AppColor.appMainColor)),
+                          vm.preparationStatus == "normal"
+                              ? (vm.currentUser?.isOnline ?? false ? 'Open-Online' : 'Open-Normal')
+                              : vm.preparationStatus == "busy"
+                              ? "Busy"
+                              : "Super Busy", // Dynamically change based on status
+                          style: AppTextStyle.comicNeue25BoldTextStyle(
+                            color: AppColor.appMainColor,
+                          ),
+                        ),
                       ),
                     ).px(8),
                   ],
@@ -108,7 +112,8 @@ class _OrdersPageState extends State<OrdersPage>
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
                                       width: 2, color: AppColor.appMainColor)),
-                              child: Text(
+                              child:
+                              Text(
                                   '${vm.statuses[0].name} (${vm.ordersPreparing.length})',
                                   textAlign: TextAlign.center,
                                   style: AppTextStyle.comicNeue27BoldTextStyle(
@@ -140,7 +145,9 @@ class _OrdersPageState extends State<OrdersPage>
                         scrollDirection: Axis.horizontal,
                         dataSet: vm.statuses,
                         itemBuilder: (context, index) {
+
                           final status = vm.statuses[index];
+                          print("Status ===> ${status.status}");
                           return Container(
                             // width: SizeConfigs.screenWidth!/3,
                             padding: EdgeInsets.zero,

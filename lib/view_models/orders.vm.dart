@@ -26,8 +26,11 @@ class OrdersViewModel extends MyBaseViewModel {
     viewContext = context;
   }
 
+
+
   User? currentUser;
   Vendor? currentVendor;
+  String preparationStatus = "normal";
 
   OrderRequest orderRequest = OrderRequest();
   List<Order> ordersOld = [];
@@ -151,6 +154,14 @@ class OrdersViewModel extends MyBaseViewModel {
     setBusy(true);
     try {
       await orderRequest.updatePreparationTime(status); // Call the method from OrderRequest
+      // Update the preparationStatus based on the selected time
+      preparationStatus = status == "on-time"
+          ? "normal"
+          : status == "busy"
+          ? "busy"
+          : "super-busy";
+      notifyListeners(); // Notify UI to update
+
       viewContext.showToast(
         msg: "Vendor preparation time updated successfully",
         bgColor: Colors.green,

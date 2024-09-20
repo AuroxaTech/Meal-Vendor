@@ -50,6 +50,7 @@ class Vendor {
     this.hasDrivers,
     this.minPrepareTime,
     this.maxPrepareTime,
+    this.extraPrepareTime,
     this.deliveryTime,
     this.inOrder,
     this.featured,
@@ -131,6 +132,7 @@ class Vendor {
   int? hasDrivers;
   int? minPrepareTime;
   int? maxPrepareTime;
+  int? extraPrepareTime;
   String? deliveryTime;
   int? inOrder;
   int? featured;
@@ -156,6 +158,7 @@ class Vendor {
   String toRawJson() => json.encode(toJson());
 
   factory Vendor.fromJson(Map<String, dynamic> json) {
+    print("Vendor Details ====> ${json.toString()}");
     return Vendor(
       id: json["id"],
       vendorType: json["vendor_type"] == null
@@ -242,6 +245,7 @@ class Vendor {
       hasDrivers: json['has_drivers'],
       minPrepareTime: json['min_prepare_time'],
       maxPrepareTime: json['max_prepare_time'],
+      extraPrepareTime: json['extra_prepare_time'],
       deliveryTime: json['delivery_time'],
       inOrder: json['in_order'],
       featured: json['featured'],
@@ -309,6 +313,7 @@ class Vendor {
         'has_drivers': hasDrivers,
         'min_prepare_time': minPrepareTime,
         'max_prepare_time': maxPrepareTime,
+        'extra_prepare_time': extraPrepareTime,
         'delivery_time': deliveryTime,
         'in_order': inOrder,
         'featured': featured,

@@ -1,6 +1,7 @@
 import 'package:cool_alert/cool_alert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:supercharged/supercharged.dart';
 import 'package:vendor/constants/app_routes.dart';
 import 'package:vendor/models/product.dart';
 import 'package:vendor/requests/product.request.dart';
@@ -86,14 +87,21 @@ class ProductViewModel extends MyBaseViewModel {
 
     try {
       final mProducts = await productRequest.getProducts(
-          page: queryPage,
-          keyword: keyword == "All Product" ? "" : keyword.toLowerCase(),
-          menuId: menuId);
+        page: queryPage,
+        keyword: keyword == "All Product" ? "" : keyword.toLowerCase(),
+        menuId: menuId,
+      );
+
+      // Print raw API response for debugging
+      print("Fetched Products: $mProducts");
+
       if (!initialLoading) {
         products.addAll(mProducts);
       } else {
         products = mProducts;
       }
+      print("Fetched Products: ${mProducts.toJSON()}");
+
       clearErrors();
     } catch (error) {
       print("Product Error ==> $error");
@@ -102,6 +110,8 @@ class ProductViewModel extends MyBaseViewModel {
 
     setBusy(false);
   }
+
+
 
   //
   productSearch(String value) {
@@ -198,26 +208,32 @@ class ProductViewModel extends MyBaseViewModel {
   }
 
   onUpdateProductAvailability(
-      {required Product product,
-        required bool isAvailable,
-        int? minutes}) async {
+      {required Product product, required bool isAvailable, int? minutes}) async {
     setBusyForObject(product.id, true);
+
     try {
+      // Update the product availability
       final apiResponse = await productRequest.updateProductAvailability(
-          product,
-          isAvailable: isAvailable,
-          availableInMinutes: minutes);
+        product,
+        isAvailable: isAvailable,
+        availableInMinutes: minutes,
+      );
+
+      // Refresh the product list to reflect changes
       if (apiResponse.allGood) {
-        // Refresh product list after updating availability
-        fetchMyProducts(); // This refreshes the product list
+        fetchMyProducts();
       }
+
       clearErrors();
     } catch (error) {
-      print("onUnAvailable product Error ==> $error");
+      print("Update product availability error ==> $error");
       setError(error);
     }
+
     setBusyForObject(product.id, false);
   }
+
+
 
   processDeletion(Product product) async {
     //

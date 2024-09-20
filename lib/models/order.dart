@@ -369,16 +369,22 @@ class Order {
   }
 
   int get remainingMinutes {
+    print("Created At ====> $createdAt");
+
+    print("maxPrepareTime ====> ${vendor!.maxPrepareTime}");
+
     int result = 0;
     if (null != vendor && null != vendor!.maxPrepareTime) {
-      result = vendor!.maxPrepareTime! -
-          DateTime.now().difference(createdAt).inMinutes;
+      result = (vendor!.maxPrepareTime! -
+          DateTime.now().difference(createdAt).inMinutes);
     }
+    print("result ====> $result");
     if (result < 0) {
       result = 0;
     }
     return result;
   }
+
 
   int get remainingTravelMinutes {
     int result = 0;
@@ -388,7 +394,7 @@ class Order {
       result = travelTime! -
           DateTime.now()
               .difference(
-                  createdAt..add(Duration(minutes: vendor!.maxPrepareTime!)))
+              createdAt..add(Duration(minutes: vendor!.maxPrepareTime!)))
               .inMinutes;
     }
     if (result < 0) {
@@ -396,4 +402,5 @@ class Order {
     }
     return result;
   }
+
 }
