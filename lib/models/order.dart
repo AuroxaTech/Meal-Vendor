@@ -369,38 +369,97 @@ class Order {
   }
 
   int get remainingMinutes {
-    print("Created At ====> $createdAt");
+    print("Created At (Server Time) ====> $createdAt");
+    print("Vendor Maxprepare Time ====> ${vendor!.maxPrepareTime}");
 
-    print("maxPrepareTime ====> ${vendor!.maxPrepareTime}");
+    // Get the current UTC time
+    DateTime nowUtc = DateTime.now().toUtc();
+
+    // Adjust the current UTC time to Vancouver time (UTC-7)
+    DateTime nowVancouver = nowUtc.add(const Duration(hours: -12));
+
+    print("Current Time (Vancouver Time - PDT) ====> $nowVancouver");
+
+    // Do NOT adjust createdAt, since it is already in Vancouver time (PDT)
+    DateTime createdAtVancouver = createdAt;
+
+    print("Created At (Vancouver Time - PDT) ====> $createdAtVancouver");
 
     int result = 0;
-    if (null != vendor && null != vendor!.maxPrepareTime) {
-      result = (vendor!.maxPrepareTime! -
-          DateTime.now().difference(createdAt).inMinutes);
+
+    if (vendor != null && vendor!.maxPrepareTime != null) {
+      // Calculate the remaining preparation time
+      int timeDifference = nowVancouver.difference(createdAtVancouver).inMinutes;
+
+      result = vendor!.maxPrepareTime! - timeDifference;
+
+      print("Time Difference in Minutes ===> $timeDifference");
+
+      // Add extraPrepareTime (if present) to the remaining time
+      if (vendor!.extraPrepareTime != null) {
+        result += vendor!.extraPrepareTime!;
+        print("Extra Prepare Time ===> ${vendor!.extraPrepareTime}");
+      }
     }
-    print("result ====> $result");
+
+    print("Remaining Time in Minutes ====> $result");
+
+    // If the result is negative, set it to 0
     if (result < 0) {
       result = 0;
     }
+
+    // If result exceeds 60 minutes, handle it appropriately
+    print("Final Remaining Minutes ===> $result");
     return result;
   }
+
+
+
 
 
   int get remainingTravelMinutes {
     int result = 0;
-    if (null != vendor &&
-        null != vendor!.maxPrepareTime &&
-        null != travelTime) {
-      result = travelTime! -
-          DateTime.now()
-              .difference(
-              createdAt..add(Duration(minutes: vendor!.maxPrepareTime!)))
-              .inMinutes;
+
+    if (vendor != null && vendor!.maxPrepareTime != null && travelTime != null) {
+      // Calculate the current time
+      DateTime nowUtc = DateTime.now().toUtc();
+
+      // Adjust the current UTC time to Vancouver time (UTC-7 or UTC-8)
+      DateTime nowVancouver = nowUtc.add(const Duration(hours: -12)); // Adjust as necessary
+
+
+      print("Current Time (Vancouver Time - PDT) ====> $nowVancouver");
+
+      // Calculate the remaining travel time by subtracting the time difference
+      DateTime createdAtVancouver = createdAt;
+      print("createdAt ====> $createdAtVancouver");
+
+      int timeDifference = nowVancouver
+          .difference(createdAtVancouver.add(Duration(minutes: vendor!.maxPrepareTime!)))
+          .inMinutes;
+
+      result = travelTime! - timeDifference;
+
+      print("Time Difference in Minutes (Travel) ===> $timeDifference");
+      print("Travel time ===> $travelTime");
+
+      // Add extraPrepareTime (if present) to the remaining travel time
+      if (vendor!.extraPrepareTime != null) {
+        result += vendor!.extraPrepareTime!;
+        print("Extra Prepare Time ===> ${vendor!.extraPrepareTime}");
+      }
     }
+
+    // Ensure result is not negative
     if (result < 0) {
       result = 0;
     }
+
+    print("Final Remaining Travel Minutes ===> $result");
     return result;
   }
+
+
 
 }

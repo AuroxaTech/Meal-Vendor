@@ -30,7 +30,6 @@ class Api {
   static const ticketList = "/ticket/list";
   static const ticketReply = "/ticket/reply";
   static const closeTicket = "/ticket/close";
-
   static const orders = "/orders";
   static const managerOrderUpdate = "/manager/update-order";
   static const futureOrders = "/future-orders";

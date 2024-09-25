@@ -1,22 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vendor/constants/app_routes.dart';
 import 'package:vendor/models/order.dart';
 import 'package:vendor/requests/order.request.dart';
-import 'package:vendor/services/app.service.dart';
 import 'package:vendor/utils/size_utils.dart';
 import 'package:vendor/view_models/base.view_model.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:velocity_x/velocity_x.dart';
-
+import 'package:web_socket_channel/web_socket_channel.dart';
 import '../models/user.dart';
 import '../models/vendor.dart';
 import '../services/auth.service.dart';
 import '../views/pages/home.page.dart';
-import '../views/pages/order/orders.page.dart';
 import '../views/pages/order/orders_details.dialog.dart';
 import '../widgets/bottomsheets/vendor_switcher.bottomsheet.dart';
 import 'ordersHistory.vm.dart';
@@ -25,13 +23,12 @@ class OrdersViewModel extends MyBaseViewModel {
   OrdersViewModel(BuildContext context) {
     viewContext = context;
   }
-
-
-
+  WebSocketChannel? channel;
+  Timer? _timer;
   User? currentUser;
   Vendor? currentVendor;
   String preparationStatus = "normal";
-
+  List<Order> orders = [];
   OrderRequest orderRequest = OrderRequest();
   List<Order> ordersOld = [];
   List<Order> ordersPreparing = [];
@@ -58,35 +55,45 @@ class OrdersViewModel extends MyBaseViewModel {
   int queryPageReady = 1;
   bool isPreparing = false;
   bool isReady = false;
-  StreamSubscription? refreshOrderStream;
+  bool isWebSocketLoading = false;
 
   void initialise() async {
     currentUser = await AuthServices.getCurrentUser(force: true);
     currentVendor = await AuthServices.getCurrentVendor(force: true);
-    refreshOrderStream = AppService().refreshAssignedOrders.listen((refresh) {
-      if (refresh) {
-        if (SizeConfigs.isTablet) {
-          fetchPreparingOrders();
-          fetchReadyOrders();
-        } else {
-          fetchMyOrders();
-        }
-      }
-    });
-    //if (SizeConfigs.isTablet) {
+    connectWebSocket();
     await fetchPreparingOrders();
     await fetchReadyOrders();
-    //} else {
     await fetchMyOrders();
-    //}
   }
+  // Connect to WebSocket server
+  void connectWebSocket() {
+    channel = WebSocketChannel.connect(Uri.parse('ws://15.222.4.249:3000/'));
 
-  dispose() {
+    // Listen to WebSocket messages
+    channel?.stream.listen((message) {
+      Map<String, dynamic> data = jsonDecode(message);
+      if (data.containsKey('order_count')) {
+        // Refresh orders without loading shimmer
+        fetchMyOrders(fromWebSocket: true);
+      }
+    }, onError: (error) {
+      print('WebSocket error: $error');
+    });
+
+// Refresh every 5 seconds without showing loading shimmer
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      fetchMyOrders(fromWebSocket: true);
+    });
+  }
+  @override
+  void dispose() {
+    // Dispose the WebSocket channel and the timer
+    channel?.sink.close();
+    _timer?.cancel();
     super.dispose();
-    refreshOrderStream?.cancel();
   }
 
-  //
+
   void statusChanged(value) {
     selectedStatus = value;
     notifyListeners();
@@ -122,10 +129,14 @@ class OrdersViewModel extends MyBaseViewModel {
     if (isPreparing && isReady) setBusy(false);
   }
 
-  Future<void> fetchMyOrders({bool initialLoading = true}) async {
-    if (initialLoading) {
+  Future<void> fetchMyOrders({bool initialLoading = true, bool fromWebSocket = false}) async {
+    // Manage loading state for initial load but not for WebSocket updates
+    if (initialLoading && !fromWebSocket) {
       setBusy(true);
       queryPage = 1;
+    } else if (fromWebSocket) {
+      // Manage a separate WebSocket loading state
+      isWebSocketLoading = true;
     } else {
       queryPage++;
     }
@@ -141,15 +152,32 @@ class OrdersViewModel extends MyBaseViewModel {
       } else {
         ordersOld = mOrders;
       }
+
+      notifyListeners();
       clearErrors();
     } catch (error) {
-      if (kDebugMode) {
-        print("Order Error ==> $error");
-      }
       setError(error);
     }
-    setBusy(false);
+
+    // Only stop the busy state if it's not a WebSocket-triggered update
+    if (!fromWebSocket) {
+      setBusy(false);
+    } else {
+      // Reset WebSocket loading state after the WebSocket call completes
+      isWebSocketLoading = false;
+    }
   }
+
+  bool isLoading() {
+    // Check both regular loading and WebSocket loading
+    return isBusy || isWebSocketLoading;
+  }
+
+
+
+
+
+
   Future<void> updatePreparationTime(String status) async {
     setBusy(true);
     try {
@@ -160,6 +188,8 @@ class OrdersViewModel extends MyBaseViewModel {
           : status == "busy"
           ? "busy"
           : "super-busy";
+      fetchMyOrders();
+      fetchReadyOrders();
       notifyListeners(); // Notify UI to update
 
       viewContext.showToast(

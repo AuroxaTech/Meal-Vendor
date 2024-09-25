@@ -6,6 +6,8 @@ version: 1.0.1+2
 environment:
   sdk: '>=3.3.4 <4.0.0'
 dependencies:
+  web_socket_channel: ^2.1.0
+  timezone: ^0.9.4
   ntp: ^2.0.0
   mime: ^1.0.5
   image_gallery_saver:

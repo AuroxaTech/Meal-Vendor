@@ -33,7 +33,9 @@ class _OrdersPageState extends State<OrdersPage>
     return SafeArea(
       child: ViewModelBuilder<OrdersViewModel>.reactive(
         viewModelBuilder: () => OrdersViewModel(context),
-        onViewModelReady: (vm) => vm.initialise(),
+        onViewModelReady: (vm) {
+          vm.initialise();
+        },
         builder: (context, vm, child) {
           return BasePage(
             body: Column(
@@ -261,41 +263,36 @@ class _OrdersPageState extends State<OrdersPage>
                           )
                         ],
                       ).py8().expand()
-                    : CustomListView(
-                        onRefresh: vm.fetchMyOrders,
-                        onLoading: () =>
-                            vm.fetchMyOrders(initialLoading: false),
-                        isLoading: vm.isBusy,
-                        dataSet: vm.ordersOld,
-                        hasError: vm.hasError,
-                        errorWidget: LoadingError(
-                          onrefresh: vm.fetchMyOrders,
-                        ),
-                        //
-                        emptyWidget: const EmptyOrder(),
-                        separatorBuilder: (context, index) =>
-                            UiSpacer.verticalSpace(space: 5),
-                        itemBuilder: (context, index) {
-                          //
-                          final order = vm.ordersOld[index];
-                          if (order.isUnpaid) {
-                            return UnPaidOrderListItem(order: order);
-                          }
-                          return vm.selectedStatus == "Preparing"
-                              ? OrderListPreparingItem(
-                                  order: order,
-                                  orderPressed: () =>
-                                      vm.openOrderDetails(context, order),
-                                  onPayPressed: () =>
-                                      vm.markOrderAsReady(order),
-                                )
-                              : OrderListReadyItem(
-                                  order: order,
-                                  orderPressed: () =>
-                                      vm.openOrderDetails(context, order),
-                                );
-                        },
-                      ).px8().expand(),
+                    :CustomListView(
+                  onRefresh: vm.fetchMyOrders,
+                  onLoading: () => vm.fetchMyOrders(initialLoading: false),
+                  isLoading: vm.isLoading(), // Update to use the new loading check
+                  dataSet: vm.ordersOld,  // Ensure correct list is passed here
+                  hasError: vm.hasError,
+                  errorWidget: LoadingError(
+                    onrefresh: vm.fetchMyOrders,
+                  ),
+                  emptyWidget: vm.ordersOld.isEmpty
+                      ? const EmptyOrder() // Display when there are no orders
+                      : null,
+                  separatorBuilder: (context, index) => UiSpacer.verticalSpace(space: 5),
+                  itemBuilder: (context, index) {
+                    final order = vm.ordersOld[index];
+                    if (order.isUnpaid) {
+                      return UnPaidOrderListItem(order: order);
+                    }
+                    return vm.selectedStatus == "Preparing"
+                        ? OrderListPreparingItem(
+                      order: order,
+                      orderPressed: () => vm.openOrderDetails(context, order),
+                      onPayPressed: () => vm.markOrderAsReady(order),
+                    )
+                        : OrderListReadyItem(
+                      order: order,
+                      orderPressed: () => vm.openOrderDetails(context, order),
+                    );
+                  },
+                ).px8().expand(),
               ],
             ),
           );

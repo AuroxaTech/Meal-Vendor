@@ -20,7 +20,7 @@ import '../../../widgets/custom_image.view.dart';
 import '../../../widgets/list_items/order_product.list_item.dart';
 
 class OrderDetailsDialog extends StatelessWidget {
-   OrderDetailsDialog({
+   const OrderDetailsDialog({
     required this.order,
     required this.onCancel,
     super.key,

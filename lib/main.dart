@@ -12,6 +12,7 @@ import 'firebase_options.dart';
 import 'services/firebase.service.dart';
 import 'services/general_app.service.dart';
 import 'services/notification.service.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 //ssll handshake error
 class MyHttpOverrides extends HttpOverrides {
@@ -27,6 +28,7 @@ void main() async {
   await runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      tz.initializeTimeZones();
       //setting up firebase notifications
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
