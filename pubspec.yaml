@@ -15,6 +15,7 @@ dependencies:
   app_to_foreground: ^0.0.3
   args: ^2.5.0
   assets_audio_player: ^3.1.1
+  assets_audio_player_web: ^3.1.1
   awesome_notifications: 0.9.3+1
   basic_utils: ^5.7.0
   blue_thermal_printer: ^1.2.3

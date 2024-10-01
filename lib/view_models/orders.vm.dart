@@ -73,16 +73,20 @@ class OrdersViewModel extends MyBaseViewModel {
     channel?.stream.listen((message) {
       Map<String, dynamic> data = jsonDecode(message);
       if (data.containsKey('order_count')) {
-        // Refresh orders without loading shimmer
+        // Refresh all orders (my orders, preparing orders, ready orders) without loading shimmer
         fetchMyOrders(fromWebSocket: true);
+        fetchPreparingOrders(fromWebSocket: true);
+        fetchReadyOrders(fromWebSocket: true);
       }
     }, onError: (error) {
       print('WebSocket error: $error');
     });
 
-// Refresh every 5 seconds without showing loading shimmer
+    // Refresh every 5 seconds without showing loading shimmer
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       fetchMyOrders(fromWebSocket: true);
+      fetchPreparingOrders(fromWebSocket: true);
+      fetchReadyOrders(fromWebSocket: true);
     });
   }
   @override
@@ -100,10 +104,14 @@ class OrdersViewModel extends MyBaseViewModel {
     fetchMyOrders();
   }
 
-  Future<void> fetchPreparingOrders({bool initialLoading = true}) async {
-    if (initialLoading) {
+  Future<void> fetchPreparingOrders({bool initialLoading = true, bool fromWebSocket = false}) async {
+    // Manage loading state for initial load but not for WebSocket updates
+    if (initialLoading && !fromWebSocket) {
       setBusy(true);
       queryPagePreparing = 1;
+    } else if (fromWebSocket) {
+      // Manage a separate WebSocket loading state
+      isWebSocketLoading = true;
     } else {
       queryPagePreparing++;
     }
@@ -119,14 +127,21 @@ class OrdersViewModel extends MyBaseViewModel {
       } else {
         ordersPreparing = mOrders;
       }
+
       isPreparing = true;
+      notifyListeners();
       clearErrors();
     } catch (error) {
       print("Order Error ==> $error");
       setError(error);
     }
-
-    if (isPreparing && isReady) setBusy(false);
+    // Only stop the busy state if it's not a WebSocket-triggered update
+    if (!fromWebSocket) {
+      setBusy(false);
+    } else {
+      // Reset WebSocket loading state after the WebSocket call completes
+      isWebSocketLoading = false;
+    }
   }
 
   Future<void> fetchMyOrders({bool initialLoading = true, bool fromWebSocket = false}) async {
@@ -206,10 +221,14 @@ class OrdersViewModel extends MyBaseViewModel {
   }
 
 
-  Future<void> fetchReadyOrders({bool initialLoading = true}) async {
-    if (initialLoading) {
+  Future<void> fetchReadyOrders({bool initialLoading = true, bool fromWebSocket = false}) async {
+    // Manage loading state for initial load but not for WebSocket updates
+    if (initialLoading && !fromWebSocket) {
       setBusy(true);
       queryPageReady = 1;
+    } else if (fromWebSocket) {
+      // Manage a separate WebSocket loading state
+      isWebSocketLoading = true;
     } else {
       queryPageReady++;
     }
@@ -219,6 +238,7 @@ class OrdersViewModel extends MyBaseViewModel {
         page: queryPageReady,
         status: 'ready',
       );
+
       if (!initialLoading) {
         ordersReady.addAll(mOrders);
       } else {
@@ -226,16 +246,19 @@ class OrdersViewModel extends MyBaseViewModel {
       }
 
       isReady = true;
+      notifyListeners();
       clearErrors();
     } catch (error) {
-      if (kDebugMode) {
-        print("Order Error ==> $error");
-      }
+      print("Order Error ==> $error");
       setError(error);
     }
 
-    if (isPreparing && isReady) {
+    // Only stop the busy state if it's not a WebSocket-triggered update
+    if (!fromWebSocket) {
       setBusy(false);
+    } else {
+      // Reset WebSocket loading state after the WebSocket call completes
+      isWebSocketLoading = false;
     }
   }
 
