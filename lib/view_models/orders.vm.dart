@@ -18,11 +18,12 @@ import '../views/pages/home.page.dart';
 import '../views/pages/order/orders_details.dialog.dart';
 import '../widgets/bottomsheets/vendor_switcher.bottomsheet.dart';
 import 'ordersHistory.vm.dart';
-//Updated Code
+
 class OrdersViewModel extends MyBaseViewModel {
   OrdersViewModel(BuildContext context) {
     viewContext = context;
   }
+
   WebSocketChannel? channel;
   Timer? _timer;
   User? currentUser;
@@ -57,25 +58,48 @@ class OrdersViewModel extends MyBaseViewModel {
   bool isReady = false;
   bool isWebSocketLoading = false;
 
+  // Initialize function
   void initialise() async {
     currentUser = await AuthServices.getCurrentUser(force: true);
     currentVendor = await AuthServices.getCurrentVendor(force: true);
+
+    // Connect to WebSocket with vendorId
     connectWebSocket();
+
+    // Fetch initial data
     await fetchPreparingOrders();
     await fetchReadyOrders();
     await fetchMyOrders();
   }
-  // Connect to WebSocket server
+
+  // Connect to WebSocket server and send vendorId in the payload
   void connectWebSocket() {
-    channel = WebSocketChannel.connect(Uri.parse('ws://15.222.4.249:3000/'));
+    // Ensure currentVendor is fetched and has an ID
+    if (currentVendor == null || currentVendor?.id == null) {
+      print('Vendor not found or vendorId is null.');
+      return;
+    }
+
+    // Connect to the new secure WebSocket URL with wss://
+    channel = WebSocketChannel.connect(
+      Uri.parse('wss://15.222.4.249:3000/'),
+    );
+
+    // Send vendorId in the WebSocket payload after connection
+    final payload = jsonEncode({
+      "vendorId": currentVendor!.id, // Send the vendor ID
+    });
+
+    channel?.sink.add(payload); // Send payload
 
     // Listen to WebSocket messages
     channel?.stream.listen((message) {
       Map<String, dynamic> data = jsonDecode(message);
+
       if (data.containsKey('order_count')) {
         // Refresh all orders (my orders, preparing orders, ready orders) without loading shimmer
         fetchMyOrders(fromWebSocket: true);
-        fetchPreparingOrders(fromWebSocket: true);
+        //fetchPreparingOrders(fromWebSocket: true);
         fetchReadyOrders(fromWebSocket: true);
       }
     }, onError: (error) {
@@ -83,12 +107,13 @@ class OrdersViewModel extends MyBaseViewModel {
     });
 
     // Refresh every 5 seconds without showing loading shimmer
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 8), (timer) {
       fetchMyOrders(fromWebSocket: true);
-      fetchPreparingOrders(fromWebSocket: true);
+      //fetchPreparingOrders(fromWebSocket: true);
       fetchReadyOrders(fromWebSocket: true);
     });
   }
+
   @override
   void dispose() {
     // Dispose the WebSocket channel and the timer
@@ -97,22 +122,18 @@ class OrdersViewModel extends MyBaseViewModel {
     super.dispose();
   }
 
-
   void statusChanged(value) {
     selectedStatus = value;
     notifyListeners();
     fetchMyOrders();
   }
 
-  Future<void> fetchPreparingOrders({bool initialLoading = true, bool fromWebSocket = false}) async {
+  Future<void> fetchPreparingOrders({bool initialLoading = true, }) async {
     // Manage loading state for initial load but not for WebSocket updates
-    if (initialLoading && !fromWebSocket) {
+    if (initialLoading ) {
       setBusy(true);
       queryPagePreparing = 1;
-    } else if (fromWebSocket) {
-      // Manage a separate WebSocket loading state
-      isWebSocketLoading = true;
-    } else {
+    } else{
       queryPagePreparing++;
     }
 
@@ -135,13 +156,14 @@ class OrdersViewModel extends MyBaseViewModel {
       print("Order Error ==> $error");
       setError(error);
     }
+
     // Only stop the busy state if it's not a WebSocket-triggered update
-    if (!fromWebSocket) {
-      setBusy(false);
-    } else {
-      // Reset WebSocket loading state after the WebSocket call completes
-      isWebSocketLoading = false;
-    }
+    // if (!fromWebSocket) {
+    //   setBusy(false);
+    // } else {
+    //   // Reset WebSocket loading state after the WebSocket call completes
+    //   isWebSocketLoading = false;
+    // }
   }
 
   Future<void> fetchMyOrders({bool initialLoading = true, bool fromWebSocket = false}) async {
@@ -182,44 +204,6 @@ class OrdersViewModel extends MyBaseViewModel {
       isWebSocketLoading = false;
     }
   }
-
-  bool isLoading() {
-    // Check both regular loading and WebSocket loading
-    return isBusy || isWebSocketLoading;
-  }
-
-
-
-
-
-
-  Future<void> updatePreparationTime(String status) async {
-    setBusy(true);
-    try {
-      await orderRequest.updatePreparationTime(status); // Call the method from OrderRequest
-      // Update the preparationStatus based on the selected time
-      preparationStatus = status == "on-time"
-          ? "normal"
-          : status == "busy"
-          ? "busy"
-          : "super-busy";
-      fetchMyOrders();
-      fetchReadyOrders();
-      notifyListeners(); // Notify UI to update
-
-      viewContext.showToast(
-        msg: "Vendor preparation time updated successfully",
-        bgColor: Colors.green,
-      );
-    } catch (error) {
-      viewContext.showToast(
-        msg: "Failed to update preparation time: $error",
-        bgColor: Colors.red,
-      );
-    }
-    setBusy(false);
-  }
-
 
   Future<void> fetchReadyOrders({bool initialLoading = true, bool fromWebSocket = false}) async {
     // Manage loading state for initial load but not for WebSocket updates
@@ -262,6 +246,38 @@ class OrdersViewModel extends MyBaseViewModel {
     }
   }
 
+  bool isLoading() {
+    // Check both regular loading and WebSocket loading
+    return isBusy || isWebSocketLoading;
+  }
+
+  Future<void> updatePreparationTime(String status) async {
+    setBusy(true);
+    try {
+      await orderRequest.updatePreparationTime(status); // Call the method from OrderRequest
+      // Update the preparationStatus based on the selected time
+      preparationStatus = status == "on-time"
+          ? "normal"
+          : status == "busy"
+          ? "busy"
+          : "super-busy";
+      fetchMyOrders();
+      fetchReadyOrders();
+      notifyListeners(); // Notify UI to update
+
+      viewContext.showToast(
+        msg: "Vendor preparation time updated successfully",
+        bgColor: Colors.green,
+      );
+    } catch (error) {
+      viewContext.showToast(
+        msg: "Failed to update preparation time: $error",
+        bgColor: Colors.red,
+      );
+    }
+    setBusy(false);
+  }
+
   cancelOrderWithNote(Order order, String note) async {
     setBusy(true);
     try {
@@ -284,8 +300,7 @@ class OrdersViewModel extends MyBaseViewModel {
     setBusy(false);
   }
 
-
-  removeItem(orderId, itemId,context) async {
+  removeItem(orderId, itemId, context) async {
     setBusy(true);
     try {
       var order = await orderRequest.removeItemFromOrder(
@@ -293,7 +308,10 @@ class OrdersViewModel extends MyBaseViewModel {
         itemId: itemId,
       );
       print(order);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()),);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
       await fetchPreparingOrders();
       await fetchReadyOrders();
       await fetchMyOrders();
@@ -344,11 +362,10 @@ class OrdersViewModel extends MyBaseViewModel {
         return AlertDialog(
           insetPadding: EdgeInsets.zero,
           backgroundColor: Colors.transparent,
-          content:
-              OrderDetailsDialog(order: order,
-                  onCancel: cancelOrderWithNote,
-
-              ),
+          content: OrderDetailsDialog(
+            order: order,
+            onCancel: cancelOrderWithNote,
+          ),
         );
       },
     );

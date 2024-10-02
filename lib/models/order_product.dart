@@ -40,7 +40,7 @@ class OrderProduct {
 
   factory OrderProduct.fromJson(Map<String, dynamic> json) {
     if (kDebugMode) {
-      print("JSON data: $json");
+      print("JSON data ===> $json");
     }
 
     List<OrderProductOption> options = [];
