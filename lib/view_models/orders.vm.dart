@@ -19,6 +19,8 @@ import '../views/pages/order/orders_details.dialog.dart';
 import '../widgets/bottomsheets/vendor_switcher.bottomsheet.dart';
 import 'ordersHistory.vm.dart';
 
+//New WebSocket Integrated
+
 class OrdersViewModel extends MyBaseViewModel {
   OrdersViewModel(BuildContext context) {
     viewContext = context;

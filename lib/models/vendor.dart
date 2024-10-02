@@ -8,6 +8,7 @@ import 'package:vendor/models/menu.dart';
 import 'package:vendor/models/package_type_pricing.dart';
 import 'package:vendor/models/vendor_type.dart';
 import 'package:random_string/random_string.dart';
+//
 
 class Vendor {
   Vendor({
