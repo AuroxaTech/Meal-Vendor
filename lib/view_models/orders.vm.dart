@@ -56,7 +56,8 @@ class OrdersViewModel extends MyBaseViewModel {
   bool isPreparing = false;
   bool isReady = false;
   bool isWebSocketLoading = false;
-  Timer? _fetchPreparingOrdersTimer;
+  Timer? _delayedFetchTimer;
+  List<Timer> _timers = [];
 
   // Initialize function
   void initialise() async {
@@ -100,13 +101,15 @@ class OrdersViewModel extends MyBaseViewModel {
         // Immediately fetch these orders
         fetchMyOrders(fromWebSocket: true);
         fetchReadyOrders(fromWebSocket: true);
+        print("Orders Fetched ========= .");
 
         // Cancel any existing timer to prevent overlapping timers
-        _fetchPreparingOrdersTimer?.cancel();
+        _delayedFetchTimer?.cancel();
 
         // Schedule fetchPreparingOrders after a 5-second delay
-        _fetchPreparingOrdersTimer = Timer(const Duration(seconds: 5), () {
+        _delayedFetchTimer = Timer(const Duration(seconds: 8), () {
           fetchPreparingOrders(fromWebSocket: true);
+          print("Preparing Orders Fetched ========= .");
         });
       }
     }, onError: (error) {
@@ -114,18 +117,50 @@ class OrdersViewModel extends MyBaseViewModel {
     });
 
     // Refresh every 5 seconds without showing loading shimmer
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      fetchMyOrders(fromWebSocket: true);
-      fetchPreparingOrders(fromWebSocket: true);
-      fetchReadyOrders(fromWebSocket: true);
+    // Start the sequence immediately
+    startSequence();
+
+    // Set up a periodic timer to repeat the sequence every 15 seconds
+    Timer periodicSequenceTimer = Timer.periodic(const Duration(seconds: 9), (timer) {
+      startSequence();
     });
+
+    _timers.add(periodicSequenceTimer);
   }
+  void startSequence() {
+    // Schedule fetchMyOrders after 3 seconds
+    Timer myOrdersTimer = Timer(const Duration(seconds: 3), () {
+      fetchMyOrders(fromWebSocket: true);
+      print("fetchMy Orders Fetched ========= .");
+
+    });
+    _timers.add(myOrdersTimer);
+
+    // Schedule fetchReadyOrders after 6 seconds
+    Timer readyOrdersTimer = Timer(const Duration(seconds: 6), () {
+      fetchReadyOrders(fromWebSocket: true);
+      print("fetch Ready Orders Fetched ========= .");
+
+    });
+    _timers.add(readyOrdersTimer);
+
+    // Schedule fetchPreparingOrders after 9 seconds
+    Timer preparingOrdersTimer = Timer(const Duration(seconds: 9), () {
+      fetchPreparingOrders(fromWebSocket: true);
+      print("fetch Preparing Orders Fetched ========= .");
+
+    });
+    _timers.add(preparingOrdersTimer);
+  }
+
 
   @override
   void dispose() {
     // Dispose the WebSocket channel and the timer
     channel?.sink.close();
-    _timer?.cancel();
+    for (var timer in _timers) {
+      timer.cancel();
+    }
     super.dispose();
   }
 
