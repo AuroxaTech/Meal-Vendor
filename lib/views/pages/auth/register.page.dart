@@ -2,7 +2,6 @@ import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:vendor/constants/api.dart';
 import 'package:vendor/constants/app_colors.dart';
 import 'package:vendor/constants/app_page_settings.dart';
@@ -112,15 +111,76 @@ class _RegisterPageState extends State<RegisterPage> {
                         //
                         20.heightBox,
                         //address
-                        TypeAheadField<Address>(
-                          hideOnLoading: false,
-                          hideWithKeyboard: false,
-                          controller: vm.addressTEC,
-                          debounceDuration: const Duration(seconds: 1),
-                          builder: (context, controller, focusNode) {
+                        // TypeAheadField<Address>(
+                        //   hideOnLoading: false,
+                        //   hideWithKeyboard: false,
+                        //   controller: vm.addressTEC,
+                        //   debounceDuration: const Duration(seconds: 1),
+                        //   builder: (context, controller, focusNode) {
+                        //     return TextField(
+                        //       controller: controller,
+                        //       // note how the controller is passed
+                        //       focusNode: focusNode,
+                        //       autofocus: false,
+                        //       decoration: InputDecoration(
+                        //         border: OutlineInputBorder(
+                        //           borderSide: BorderSide(
+                        //             color: AppColor.primaryColor,
+                        //           ),
+                        //         ),
+                        //         hintText: "Address".tr(),
+                        //         labelText: "Address".tr(),
+                        //         focusedBorder: OutlineInputBorder(
+                        //           borderSide: BorderSide(
+                        //             color: AppColor.primaryColor,
+                        //           ),
+                        //         ),
+                        //         enabledBorder: OutlineInputBorder(
+                        //           borderSide: BorderSide(
+                        //             color: AppColor.primaryColor,
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     );
+                        //   },
+                        //   suggestionsCallback: vm.searchAddress,
+                        //   itemBuilder: (context, Address? suggestion) {
+                        //     if (suggestion == null) {
+                        //       return const Divider();
+                        //     }
+                        //     //
+                        //     return VStack(
+                        //       [
+                        //         (suggestion.addressLine ?? '')
+                        //             .text
+                        //             .semiBold
+                        //             .lg
+                        //             .make()
+                        //             .px(12),
+                        //         const Divider(),
+                        //       ],
+                        //     );
+                        //   },
+                        //   onSelected: vm.onAddressSelected,
+                        // ),
+
+
+                        Autocomplete<Address>(
+                          optionsBuilder: (TextEditingValue textEditingValue) async {
+                            if (textEditingValue.text.isEmpty || textEditingValue.text.length < 4) {
+                              return const Iterable<Address>.empty();
+                            }
+                            // Fetch suggestions based on the input
+                            return await vm.searchAddress(textEditingValue.text);
+                          },
+                          displayStringForOption: (Address option) => option.addressLine ?? '',
+                          fieldViewBuilder: (BuildContext context,
+                              TextEditingController textEditingController,
+                              FocusNode focusNode,
+                              VoidCallback onFieldSubmitted) {
+                            vm.addressTEC = textEditingController;
                             return TextField(
-                              controller: controller,
-                              // note how the controller is passed
+                              controller: textEditingController,
                               focusNode: focusNode,
                               autofocus: false,
                               decoration: InputDecoration(
@@ -144,27 +204,42 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                             );
                           },
-                          suggestionsCallback: vm.searchAddress,
-                          itemBuilder: (context, Address? suggestion) {
-                            if (suggestion == null) {
-                              return const Divider();
-                            }
-                            //
-                            return VStack(
-                              [
-                                (suggestion.addressLine ?? '')
-                                    .text
-                                    .semiBold
-                                    .lg
-                                    .make()
-                                    .px(12),
-                                const Divider(),
-                              ],
+                          onSelected: (Address selection) {
+                            vm.onAddressSelected(selection);
+                          },
+                          optionsViewBuilder: (BuildContext context,
+                              AutocompleteOnSelected<Address> onSelected, Iterable<Address> options) {
+                            return Align(
+                              alignment: Alignment.topLeft,
+                              child: Material(
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width - 40,
+                                  child: ListView.builder(
+                                    padding: EdgeInsets.all(8.0),
+                                    itemCount: options.length,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      final Address option = options.elementAt(index);
+                                      return GestureDetector(
+                                        onTap: () => onSelected(option),
+                                        child: VStack(
+                                          [
+                                            (option.addressLine ?? '')
+                                                .text
+                                                .semiBold
+                                                .lg
+                                                .make()
+                                                .px(12),
+                                            const Divider(),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
                             );
                           },
-                          onSelected: vm.onAddressSelected,
                         ),
-
                         //
                         CustomLoadingStateView(
                           loading: vm.busy(vm.vendorTypes),
